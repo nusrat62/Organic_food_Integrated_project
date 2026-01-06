@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopping Cart - Pure Harvest</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+.sidebar-transition { transition: transform 0.3s ease-in-out; }
+.cart-item { transition: all 0.3s ease; }
+.cart-item:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+.fade-in { animation: fadeIn 0.5s ease-in; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.notification { position: fixed; top: 80px; right: 20px; z-index: 100; animation: slideIn 0.3s ease-out; }
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.hero-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.quantity-btn { transition: all 0.2s ease; }
+.quantity-btn:hover { transform: scale(1.1); }
+.quantity-btn:active { transform: scale(0.95); }
+.checkout-btn { transition: all 0.3s ease; position: relative; overflow: hidden; }
+.checkout-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition: left 0.5s; }
+.checkout-btn:hover::before { left: 100%; }
+.remove-btn { transition: all 0.3s ease; }
+.remove-btn:hover { transform: rotate(90deg) scale(1.1); }
+.product-card { transition: all 0.3s ease; }
+.product-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
+.shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+.category-badge { transition: all 0.2s ease; }
+.category-badge:hover { transform: scale(1.05); }
+.price-tag { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+.related-section { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); }
+</style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 via-white to-blue-50 min-h-screen">
+
+
+<nav class="glass-effect border-b border-white/20 px-6 py-4 flex items-center justify-between sticky top-0 z-[60] shadow-lg">
+  <div class="flex items-center gap-4">
+    <button onclick="toggleSidebar()" class="p-2 hover:bg-white/50 rounded-xl transition text-gray-700">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+    </button>
+    <div class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 font-bold text-2xl flex items-center gap-2 italic">🌱 Pure Harvest</div>
+  </div>
+  <div class="hidden md:flex items-center gap-3 mr-4">
+    <a href="product-crud.html" class="text-gray-700 hover:text-purple-600 transition flex items-center gap-2 font-medium px-4 py-2 rounded-lg hover:bg-white/50">
+      <i data-lucide="arrow-left" class="w-5 h-5"></i> Continue Shopping
+    </a>
+  </div>
+</nav>
+
+
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-[70] hidden backdrop-blur-sm"></div>
+<aside id="sidebar" class="fixed left-0 top-0 h-full w-72 bg-white z-[80] shadow-2xl sidebar-transition -translate-x-full flex flex-col p-6">
+  <div class="flex items-center justify-between mb-8">
+      <span class="text-purple-600 font-bold text-xl">Navigation</span>
+      <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+  </div>
+  <nav class="flex flex-col gap-2">
+    <a href="index.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-purple-50 transition"><i data-lucide="home" class="w-5 h-5"></i> Home</a>
+    <a href="product-crud.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-purple-50 transition"><i data-lucide="box" class="w-5 h-5"></i> Products</a>
+    <a href="cart.html" class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg"><i data-lucide="shopping-cart" class="w-5 h-5"></i> Shopping Cart</a>
+    <a href="checkout.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-purple-50 transition"><i data-lucide="credit-card" class="w-5 h-5"></i> Checkout</a>
+    <a href="orders.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-purple-50 transition"><i data-lucide="history" class="w-5 h-5"></i> Order History</a>
+    <a href="farmer-profile.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-purple-50 transition"><i data-lucide="tractor" class="w-5 h-5"></i> Farmer Profile</a>
+    <a href="admin.html" class="flex items-center gap-4 p-3 rounded-xl text-red-600 font-bold hover:bg-red-50 transition"><i data-lucide="shield-check" class="w-5 h-5"></i> Admin Panel</a>
+  </nav>
+</aside>
+
+
+<div id="notificationContainer"></div>
+
+
+<div id="orderConfirmationModal" class="fixed inset-0 bg-black/50 z-[90] hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 text-center">
+    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+      <i data-lucide="check-circle" class="w-10 h-10 text-green-600"></i>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Order Placed Successfully!</h2>
+    <p class="text-gray-600 mb-6">Your order has been confirmed and a confirmation email has been sent to your registered email address.</p>
+    <div class="flex gap-4">
+      <button onclick="closeOrderConfirmation()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl hover:bg-gray-300 transition font-semibold">
+        Continue Shopping
+      </button>
+      <button onclick="viewOrder()" class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl hover:shadow-lg transition font-semibold">
+        View Order
+      </button>
+    </div>
+  </div>
+</div>
+
+<main class="flex-1 p-6 md:p-12">
+  <div class="max-w-7xl mx-auto">
+
+    <div class="hero-gradient rounded-3xl p-8 mb-8 text-white relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
+      <div class="relative z-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="bg-white/20 p-3 rounded-2xl backdrop-blur-sm">
+            <i data-lucide="shopping-cart" class="w-8 h-8"></i>
+          </div>
+          <h1 class="text-3xl md:text-4xl font-bold">Shopping Cart</h1>
+        </div>
+        <p class="text-white/90 text-lg">Review your items and proceed to checkout</p>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+      <div class="lg:col-span-2">
+        <div id="cartContainer" class="space-y-6"></div>
+        
+      
+        <div id="emptyCart" class="bg-white/80 backdrop-blur-sm p-12 rounded-3xl shadow-xl text-center hidden">
+          <div class="w-40 h-40 mx-auto bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-8">
+            <i data-lucide="shopping-cart" class="w-20 h-20 text-purple-400"></i>
+          </div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">Your cart is empty</h2>
+          <p class="text-gray-600 mb-8 max-w-md mx-auto text-lg">Looks like you haven't added any products to your cart yet. Start shopping to fill it up!</p>
+          <a href="product-crud.html" class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-2xl hover:shadow-xl transition font-medium text-lg">
+            <i data-lucide="shopping-bag" class="w-5 h-5"></i> Start Shopping
+          </a>
+        </div>
+      </div>
+      
+   
+      <div class="lg:col-span-1">
+        <div class="bg-white/90 backdrop-blur-sm p-6 rounded-3xl shadow-xl sticky top-24 border border-white/20">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="bg-gradient-to-br from-purple-100 to-blue-100 p-3 rounded-xl">
+              <i data-lucide="file-text" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800">Order Summary</h2>
+          </div>
+          
+          <div class="space-y-4 mb-6">
+            <div class="flex justify-between pb-4 border-b border-gray-200">
+              <span class="text-gray-600 font-medium">Subtotal</span>
+              <span id="subtotal" class="font-bold text-lg">$0.00</span>
+            </div>
+            <div class="flex justify-between pb-4 border-b border-gray-200">
+              <span class="text-gray-600 font-medium">Tax (10%)</span>
+              <span id="tax" class="font-bold text-lg">$0.00</span>
+            </div>
+            <div class="flex justify-between pb-4 border-b border-gray-200">
+              <span class="text-gray-600 font-medium">Shipping</span>
+              <span id="shipping" class="font-bold text-lg">$5.00</span>
+            </div>
+            <div class="flex justify-between pt-4">
+              <span class="text-xl font-bold text-gray-800">Total</span>
+              <span id="total" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">$0.00</span>
+            </div>
+          </div>
+          
+          <div class="mb-6 p-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl border border-purple-200">
+            <label class="block text-sm font-semibold text-gray-700 mb-3">Promo Code</label>
+            <div class="flex gap-2">
+              <input type="text" id="promoCode" placeholder="Enter code" class="flex-1 p-3 border-2 border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+              <button onclick="applyPromo()" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transition font-semibold">
+                Apply
+              </button>
+            </div>
+            <div id="promoMessage" class="text-sm mt-3"></div>
+          </div>
+          
+          <button id="proceedToCheckoutBtn" onclick="proceedToCheckout()" class="checkout-btn block w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-2xl hover:shadow-xl transition text-center font-bold text-lg relative">
+            <span class="relative z-10 flex items-center justify-center gap-2">
+              <i data-lucide="lock" class="w-5 h-5"></i> Proceed to Checkout
+            </span>
+          </button>
+          
+          <a href="product-crud.html" class="block w-full bg-gray-100 text-gray-800 py-4 rounded-2xl hover:bg-gray-200 transition text-center font-semibold mt-4">
+            Continue Shopping
+          </a>
+          
+          <div class="mt-6 p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-200">
+            <div class="flex items-start gap-3">
+              <div class="bg-green-100 p-2 rounded-lg">
+                <i data-lucide="shield-check" class="w-5 h-5 text-green-600"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-green-900">Secure Checkout</h3>
+                <p class="text-sm text-green-700 mt-1">Your payment information is encrypted and secure</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+   
+    <div id="relatedSection" class="mt-16 related-section rounded-3xl p-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">You Might Also Like</h2>
+          <p class="text-gray-600">Discover more products from your favorite categories</p>
+        </div>
+        <button onclick="loadRelatedProducts()" class="bg-white px-4 py-2 rounded-xl shadow hover:shadow-md transition flex items-center gap-2">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh
+        </button>
+      </div>
+      <div id="relatedProducts" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+
+let allProducts = [];
+let currentUser = null;
+
+
+async function fetchProducts() {
+  try {
+    const response = await fetch('product.json');
+    allProducts = await response.json();
+  } catch (error) {
+    console.error('Error fetching products:', error);
+  }
+}
+
+function fetchCurrentUser() {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (user) {
+    currentUser = user;
+  }
+}
+
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('-translate-x-full');
+  overlay.classList.toggle('hidden');
+}
+document.getElementById('sidebar-overlay').addEventListener('click', toggleSidebar);
+
+
+function showNotification(message, type = 'success') {
+  const container = document.getElementById('notificationContainer');
+  const notification = document.createElement('div');
+  notification.className = `notification p-4 rounded-2xl shadow-2xl ${
+    type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-pink-500'
+  } text-white`;
+  notification.innerHTML = `
+    <div class="flex items-center gap-3">
+      <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-6 h-6"></i>
+      <span class="font-medium">${message}</span>
+    </div>
+  `;
+  container.appendChild(notification);
+  lucide.createIcons();
+  
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+
+function applyPromo() {
+  const promoCode = document.getElementById('promoCode').value.toUpperCase();
+  const promoMessage = document.getElementById('promoMessage');
+  
+  if (promoCode === 'HARVEST10') {
+    promoMessage.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 inline"></i> Promo code applied! 10% discount on your order.';
+    promoMessage.className = 'text-sm mt-3 text-green-600 font-medium flex items-center gap-1';
+    calculateTotal(true);
+  } else if (promoCode === 'FRESH20') {
+    promoMessage.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 inline"></i> Promo code applied! 20% discount on your order!';
+    promoMessage.className = 'text-sm mt-3 text-green-600 font-medium flex items-center gap-1';
+    calculateTotal(true, 0.2);
+  } else if (promoCode === '') {
+    promoMessage.textContent = '';
+    calculateTotal(false);
+  } else {
+    promoMessage.innerHTML = '<i data-lucide="x-circle" class="w-4 h-4 inline"></i> Invalid promo code.';
+    promoMessage.className = 'text-sm mt-3 text-red-600 font-medium flex items-center gap-1';
+  }
+  lucide.createIcons();
+}
+
+
+function calculateTotal(hasPromo = false, discount = 0.1) {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const subtotalElement = document.getElementById('subtotal');
+  const taxElement = document.getElementById('tax');
+  const totalElement = document.getElementById('total');
+  
+  let subtotal = 0;
+  cart.forEach(item => {
+    subtotal += item.price * item.quantity;
+  });
+  
+  const tax = subtotal * 0.1;
+  const shipping = cart.length > 0 ? 5 : 0;
+  let total = subtotal + tax + shipping;
+  
+  if (hasPromo) {
+    total *= (1 - discount);
+  }
+  
+  subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+  taxElement.textContent = `$${tax.toFixed(2)}`;
+  totalElement.textContent = `$${total.toFixed(2)}`;
+}
+
+
+function proceedToCheckout() {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  
+  if (cart.length === 0) {
+    showNotification("Your cart is empty!", "error");
+    return;
+  }
+  
+
+  localStorage.setItem('checkoutCart', JSON.stringify(cart));
+  
+
+  window.location.href = 'checkout.html';
+}
+
+
+function sendOrderConfirmationEmail(orderDetails) {
+
+  
+  if (!currentUser || !currentUser.email) {
+    console.error("No user email available");
+    return;
+  }
+  
+
+  console.log("Sending order confirmation email to:", currentUser.email);
+  console.log("Order details:", orderDetails);
+  
+
+  showNotification(`Order confirmation sent to ${currentUser.email}`);
+  
+
+}
+
+
+function closeOrderConfirmation() {
+  document.getElementById('orderConfirmationModal').classList.add('hidden');
+
+  localStorage.setItem('cart', JSON.stringify([]));
+  loadCart();
+}
+
+
+function viewOrder() {
+  document.getElementById('orderConfirmationModal').classList.add('hidden');
+  
+  window.location.href = 'orders.html';
+}
+
+
+function loadRelatedProducts() {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const container = document.getElementById('relatedProducts');
+  const relatedSection = document.getElementById('relatedSection');
+  
+  if (cart.length === 0) {
+    relatedSection.classList.add('hidden');
+    return;
+  }
+  
+  relatedSection.classList.remove('hidden');
+  container.innerHTML = '';
+  
+  
+  const cartCategories = [...new Set(cart.map(item => item.category))];
+  
+ 
+  const cartItemIds = new Set(cart.map(item => item.id));
+  const relatedProducts = allProducts.filter(product => 
+    cartCategories.includes(product.category) && !cartItemIds.has(product.id)
+  );
+  
+  
+  const shuffled = relatedProducts.sort(() => 0.5 - Math.random());
+  const selectedProducts = shuffled.slice(0, 8);
+  
+  if (selectedProducts.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full text-center py-12">
+        <i data-lucide="package" class="w-16 h-16 mx-auto text-gray-300 mb-4"></i>
+        <p class="text-gray-500">No related products found</p>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+  
+
+  const categoryStyles = {
+    'Fruits': { bg: 'bg-red-100', text: 'text-red-700', icon: 'apple' },
+    'Vegetables': { bg: 'bg-green-100', text: 'text-green-700', icon: 'carrot' },
+    'Dairy': { bg: 'bg-blue-100', text: 'text-blue-700', icon: 'milk' },
+    'Meat': { bg: 'bg-orange-100', text: 'text-orange-700', icon: 'beef' },
+    'Seafood': { bg: 'bg-cyan-100', text: 'text-cyan-700', icon: 'fish' },
+    'Bakery': { bg: 'bg-amber-100', text: 'text-amber-700', icon: 'wheat' },
+    'Grains': { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: 'grain' },
+    'Pantry': { bg: 'bg-purple-100', text: 'text-purple-700', icon: 'jar' },
+    'Snacks': { bg: 'bg-pink-100', text: 'text-pink-700', icon: 'cookie' },
+    'Beverages': { bg: 'bg-indigo-100', text: 'text-indigo-700', icon: 'coffee' },
+    'Frozen Foods': { bg: 'bg-sky-100', text: 'text-sky-700', icon: 'snowflake' },
+    'Condiments': { bg: 'bg-rose-100', text: 'text-rose-700', icon: 'sauce' },
+    'Herbs': { bg: 'bg-lime-100', text: 'text-lime-700', icon: 'leaf' },
+    'Baby Food': { bg: 'bg-pink-100', text: 'text-pink-700', icon: 'baby' },
+    'Pet Food': { bg: 'bg-amber-100', text: 'text-amber-700', icon: 'dog' }
+  };
+  
+  selectedProducts.forEach(product => {
+    const style = categoryStyles[product.category] || { bg: 'bg-gray-100', text: 'text-gray-700', icon: 'package' };
+    const isInStock = product.stock > 0;
+    
+    const card = document.createElement('div');
+    card.className = "product-card bg-white rounded-2xl shadow-lg overflow-hidden fade-in";
+    
+    card.innerHTML = `
+      <div class="relative">
+        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover">
+        <div class="absolute top-3 left-3 ${style.bg} ${style.text} px-3 py-1 rounded-full text-xs font-bold category-badge flex items-center gap-1">
+          ${style.icon ? `<i data-lucide="${style.icon}" class="w-3 h-3"></i>` : ''}
+          ${product.category}
+        </div>
+        ${!isInStock ? '<div class="absolute inset-0 bg-black/50 flex items-center justify-center"><span class="text-white font-bold">Out of Stock</span></div>' : ''}
+      </div>
+      <div class="p-4">
+        <h3 class="font-bold text-lg text-gray-800 mb-2 line-clamp-2">${product.name}</h3>
+        <div class="flex justify-between items-center mb-3">
+          <div class="price-tag text-white px-3 py-1 rounded-full font-bold">
+            $${product.price.toFixed(2)}
+          </div>
+          <span class="text-sm text-gray-500">Stock: ${product.stock}</span>
+        </div>
+        <button onclick="addToCartFromRelated(${product.id})" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-2 rounded-xl hover:shadow-lg transition font-semibold ${!isInStock ? 'opacity-50 cursor-not-allowed' : ''}" ${!isInStock ? 'disabled' : ''}>
+          <i data-lucide="shopping-cart" class="w-4 h-4 inline mr-2"></i> Add to Cart
+        </button>
+      </div>
+    `;
+    
+    container.appendChild(card);
+  });
+  
+  lucide.createIcons();
+}
+
+
+function addToCartFromRelated(productId) {
+  const product = allProducts.find(p => p.id === productId);
+  if (!product || product.stock <= 0) return;
+  
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const existing = cart.find(item => item.id === productId);
+  
+  if (existing) {
+    if (existing.quantity < product.stock) {
+      existing.quantity++;
+      showNotification(`${product.name} quantity updated!`);
+    } else {
+      showNotification("Maximum stock reached!", "error");
+    }
+  } else {
+    cart.push({...product, quantity: 1});
+    showNotification(`${product.name} added to cart!`);
+  }
+  
+  localStorage.setItem('cart', JSON.stringify(cart));
+  loadCart();
+  loadRelatedProducts();
+}
+
+
+function loadCart() {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const container = document.getElementById('cartContainer');
+  const emptyCart = document.getElementById('emptyCart');
+  
+  container.innerHTML = '';
+  
+  if(cart.length === 0){
+    container.classList.add('hidden');
+    emptyCart.classList.remove('hidden');
+    calculateTotal();
+    document.getElementById('relatedSection').classList.add('hidden');
+    return;
+  }
+  
+  container.classList.remove('hidden');
+  emptyCart.classList.add('hidden');
+  
+  cart.forEach(item => {
+    const div = document.createElement('div');
+    div.className = "bg-white/90 backdrop-blur-sm p-6 rounded-3xl shadow-xl cart-item fade-in border border-white/20";
+    
+   
+    const categoryColors = {
+      'Fruits': 'bg-red-100 text-red-700',
+      'Vegetables': 'bg-green-100 text-green-700',
+      'Dairy': 'bg-blue-100 text-blue-700',
+      'Meat': 'bg-orange-100 text-orange-700',
+      'Seafood': 'bg-cyan-100 text-cyan-700',
+      'Bakery': 'bg-amber-100 text-amber-700',
+      'Grains': 'bg-yellow-100 text-yellow-700',
+      'Pantry': 'bg-purple-100 text-purple-700',
+      'Snacks': 'bg-pink-100 text-pink-700',
+      'Beverages': 'bg-indigo-100 text-indigo-700',
+      'Frozen Foods': 'bg-sky-100 text-sky-700',
+      'Condiments': 'bg-rose-100 text-rose-700',
+      'Herbs': 'bg-lime-100 text-lime-700',
+      'Baby Food': 'bg-pink-100 text-pink-700',
+      'Pet Food': 'bg-amber-100 text-amber-700'
+    };
+    
+    const categoryColor = categoryColors[item.category] || 'bg-gray-100 text-gray-700';
+    
+    div.innerHTML = `
+      <div class="flex gap-6">
+        <div class="relative">
+          <img src="${item.image}" alt="${item.name}" class="w-32 h-32 object-cover rounded-2xl shadow-md">
+          <span class="absolute top-3 right-3 ${categoryColor} px-3 py-1 rounded-full text-xs font-bold category-badge">
+            ${item.category}
+          </span>
+        </div>
+        <div class="flex-1">
+          <h2 class="font-bold text-xl text-gray-800 mb-2">${item.name}</h2>
+          <div class="price-tag text-white px-4 py-2 rounded-full inline-block font-bold text-lg mb-4">
+            $${item.price.toFixed(2)}
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="flex items-center bg-gray-100 rounded-xl">
+              <button onclick="changeQuantity(${item.id}, -1)" class="quantity-btn p-3 rounded-l-xl hover:bg-gray-200 transition">
+                <i data-lucide="minus" class="w-4 h-4"></i>
+              </button>
+              <span class="w-12 text-center font-bold text-lg">${item.quantity}</span>
+              <button onclick="changeQuantity(${item.id}, 1)" class="quantity-btn p-3 rounded-r-xl hover:bg-gray-200 transition">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div class="flex-1 text-right">
+              <p class="text-sm text-gray-500 mb-1">Subtotal</p>
+              <p class="font-bold text-2xl text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">$${(item.price * item.quantity).toFixed(2)}</p>
+            </div>
+          </div>
+        </div>
+        <button onclick="removeFromCart(${item.id})" class="remove-btn bg-red-100 text-red-600 p-4 rounded-2xl hover:bg-red-200 transition self-start">
+          <i data-lucide="trash-2" class="w-5 h-5"></i>
+        </button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  
+  calculateTotal();
+  loadRelatedProducts();
+  lucide.createIcons();
+}
+
+
+function changeQuantity(id, delta){
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const item = cart.find(p => p.id === id);
+  if(!item) return;
+  
+  item.quantity += delta;
+  if(item.quantity < 1) item.quantity = 1;
+  
+  localStorage.setItem('cart', JSON.stringify(cart));
+  loadCart();
+  showNotification("Cart updated!");
+}
+
+
+function removeFromCart(id){
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const item = cart.find(item => item.id === id);
+  cart = cart.filter(item => item.id !== id);
+  localStorage.setItem('cart', JSON.stringify(cart));
+  loadCart();
+  showNotification(`${item.name} removed from cart!`);
+}
+
+
+function checkForOrderConfirmation() {
+  const orderConfirmed = localStorage.getItem('orderConfirmed');
+  if (orderConfirmed === 'true') {
+   
+    document.getElementById('orderConfirmationModal').classList.remove('hidden');
+    
+  
+    localStorage.setItem('orderConfirmed', 'false');
+    
+    
+    const orderDetails = JSON.parse(localStorage.getItem('lastOrderDetails') || '{}');
+    
+   
+    sendOrderConfirmationEmail(orderDetails);
+  }
+}
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await fetchProducts();
+  fetchCurrentUser();
+  loadCart();
+  checkForOrderConfirmation();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order History - Pure Harvest</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+.sidebar-transition { transition: transform 0.3s ease-in-out; }
+.order-card { transition: all 0.3s ease; }
+.order-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+.fade-in { animation: fadeIn 0.5s ease-in; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+
+<nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-[60] shadow-sm">
+  <div class="flex items-center gap-4">
+    <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-lg transition text-gray-700">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+    </button>
+    <div class="text-green-700 font-bold text-2xl flex items-center gap-2 italic">🌱 Pure Harvest</div>
+  </div>
+</nav>
+
+
+<div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/30 z-[70] hidden backdrop-blur-sm"></div>
+<aside id="sidebar" class="fixed left-0 top-0 h-full w-72 bg-white z-[80] shadow-2xl sidebar-transition -translate-x-full flex flex-col p-6">
+  <div class="flex items-center justify-between mb-8">
+    <span class="text-green-700 font-bold text-xl">Navigation</span>
+    <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+  </div>
+  <nav class="flex flex-col gap-2">
+    <a href="index.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-green-50 transition"><i data-lucide="home" class="w-5 h-5"></i> Home</a>
+    <a href="product-crud.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-green-50 transition"><i data-lucide="box" class="w-5 h-5"></i> Product CRUD</a>
+    <a href="cart.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-green-50 transition"><i data-lucide="shopping-cart" class="w-5 h-5"></i> Shopping Cart</a>
+    <a href="checkout.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-green-50 transition"><i data-lucide="credit-card" class="w-5 h-5"></i> Checkout</a>
+    <a href="orders.html" class="flex items-center gap-4 p-3 rounded-xl bg-green-700 text-white shadow-lg"><i data-lucide="history" class="w-5 h-5"></i> Order History</a>
+    <a href="farmer-profile.html" class="flex items-center gap-4 p-3 rounded-xl hover:bg-green-50 transition"><i data-lucide="tractor" class="w-5 h-5"></i> Farmer Profile</a>
+    <a href="admin.html" class="flex items-center gap-4 p-3 rounded-xl text-red-600 font-bold hover:bg-red-50 transition"><i data-lucide="shield-check" class="w-5 h-5"></i> Admin Panel</a>
+  </nav>
+</aside>
+
+<main class="flex-1 p-6 md:p-12">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Order History</h1>
+      <div class="flex gap-2">
+        <select id="statusFilter" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+          <option value="">All Orders</option>
+          <option value="Processing">Processing</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+        <input type="text" id="searchOrder" placeholder="Search by order ID..." class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+      </div>
+    </div>
+    
+    <div id="ordersContainer" class="space-y-6"></div>
+    
+    <div id="emptyOrders" class="bg-white p-8 rounded-xl shadow text-center hidden">
+      <i data-lucide="package" class="w-16 h-16 mx-auto text-gray-300 mb-4"></i>
+      <h2 class="text-xl font-semibold text-gray-700 mb-2">No orders yet</h2>
+      <p class="text-gray-500 mb-4">You haven't placed any orders yet.</p>
+      <a href="product-crud.html" class="inline-block bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition">
+        Start Shopping
+      </a>
+    </div>
+  </div>
+</main>
+
+
+<div id="orderModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">Order Details</h2>
+      <button onclick="closeOrderModal()" class="p-1 hover:bg-gray-100 rounded">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div id="orderDetails"></div>
+  </div>
+</div>
+
+<script>
+
+let orders = [
+  {
+    id: "#1001",
+    date: "2025-12-29",
+    status: "Delivered",
+    total: 12.48,
+    items: [
+      { id: 1, name: "Organic Apple", price: 3.99, quantity: 2, image: "https://picsum.photos/seed/1/400/300.jpg" },
+      { id: 2, name: "Fresh Carrot", price: 1.99, quantity: 1, image: "https://picsum.photos/seed/2/400/300.jpg" },
+      { id: 3, name: "Organic Milk", price: 2.49, quantity: 1, image: "https://picsum.photos/seed/3/400/300.jpg" }
+    ],
+    shippingAddress: "123 Main St, Anytown, USA 12345",
+    paymentMethod: "Credit Card"
+  },
+  {
+    id: "#1002",
+    date: "2025-12-28",
+    status: "Processing",
+    total: 3.79,
+    items: [
+      { id: 4, name: "Organic Whole Milk", price: 3.79, quantity: 1, image: "https://picsum.photos/seed/7/400/300.jpg" }
+    ],
+    shippingAddress: "456 Oak Ave, Somecity, USA 67890",
+    paymentMethod: "PayPal"
+  },
+  {
+    id: "#1003",
+    date: "2025-12-27",
+    status: "Shipped",
+    total: 15.50,
+    items: [
+      { id: 5, name: "Organic Banana", price: 2.99, quantity: 2, image: "https://picsum.photos/seed/4/400/300.jpg" },
+      { id: 6, name: "Organic Strawberry", price: 4.50, quantity: 2, image: "https://picsum.photos/seed/5/400/300.jpg" }
+    ],
+    shippingAddress: "789 Pine Rd, Otherville, USA 10112",
+    paymentMethod: "Credit Card"
+  }
+];
+
+let filteredOrders = [...orders];
+
+
+function initializeOrders() {
+  const savedOrders = localStorage.getItem('orders');
+  if (savedOrders) {
+    orders = JSON.parse(savedOrders);
+    filteredOrders = [...orders];
+  }
+  renderOrders();
+}
+
+
+function renderOrders() {
+  const container = document.getElementById('ordersContainer');
+  const emptyOrders = document.getElementById('emptyOrders');
+  
+  container.innerHTML = '';
+  
+  if(filteredOrders.length === 0){
+    container.classList.add('hidden');
+    emptyOrders.classList.remove('hidden');
+    return;
+  }
+  
+  container.classList.remove('hidden');
+  emptyOrders.classList.add('hidden');
+  
+  filteredOrders.forEach(order => {
+    const statusColor = order.status === 'Delivered' ? 'text-green-600 bg-green-100' : 
+                       order.status === 'Processing' ? 'text-blue-600 bg-blue-100' : 
+                       order.status === 'Shipped' ? 'text-yellow-600 bg-yellow-100' : 
+                       'text-red-600 bg-red-100';
+    
+    const div = document.createElement('div');
+    div.className = "bg-white rounded-xl shadow p-6 order-card fade-in";
+    div.innerHTML = `
+      <div class="flex flex-col md:flex-row justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-1">Order ${order.id}</h3>
+          <p class="text-sm text-gray-500">Placed on ${order.date}</p>
+        </div>
+        <div class="flex items-center gap-3 mt-2 md:mt-0">
+          <span class="px-3 py-1 rounded-full text-sm font-medium ${statusColor}">${order.status}</span>
+          <span class="font-semibold text-lg">$${order.total.toFixed(2)}</span>
+        </div>
+      </div>
+      
+      <div class="flex gap-4 mb-4 overflow-x-auto">
+        ${order.items.map(item => `
+          <div class="flex-shrink-0">
+            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
+            <p class="text-xs text-center mt-1">${item.quantity}x</p>
+          </div>
+        `).join('')}
+      </div>
+      
+      <div class="flex justify-between items-center">
+        <p class="text-sm text-gray-600">${order.items.length} items</p>
+        <div class="flex gap-2">
+          <button onclick="viewOrderDetails('${order.id}')" class="text-green-700 hover:text-green-800 font-medium text-sm flex items-center gap-1">
+            <i data-lucide="eye" class="w-4 h-4"></i> View Details
+          </button>
+          ${order.status === 'Delivered' ? `
+            <button onclick="reorderItems('${order.id}')" class="text-blue-700 hover:text-blue-800 font-medium text-sm flex items-center gap-1">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i> Reorder
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  
+  lucide.createIcons();
+}
+
+
+document.getElementById('statusFilter').addEventListener('change', filterOrders);
+document.getElementById('searchOrder').addEventListener('input', filterOrders);
+
+function filterOrders() {
+  const status = document.getElementById('statusFilter').value;
+  const searchTerm = document.getElementById('searchOrder').value.toLowerCase();
+  
+  filteredOrders = orders.filter(order => {
+    const matchesStatus = !status || order.status === status;
+    const matchesSearch = !searchTerm || order.id.toLowerCase().includes(searchTerm);
+    return matchesStatus && matchesSearch;
+  });
+  
+  renderOrders();
+}
+
+
+function viewOrderDetails(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+  
+  const statusColor = order.status === 'Delivered' ? 'text-green-600 bg-green-100' : 
+                     order.status === 'Processing' ? 'text-blue-600 bg-blue-100' : 
+                     order.status === 'Shipped' ? 'text-yellow-600 bg-yellow-100' : 
+                     'text-red-600 bg-red-100';
+  
+  const detailsContainer = document.getElementById('orderDetails');
+  detailsContainer.innerHTML = `
+    <div class="space-y-4">
+      <div class="flex justify-between items-center pb-4 border-b">
+        <h3 class="text-lg font-semibold">Order ${order.id}</h3>
+        <span class="px-3 py-1 rounded-full text-sm font-medium ${statusColor}">${order.status}</span>
+      </div>
+      
+      <div>
+        <h4 class="font-medium text-gray-700 mb-2">Order Information</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="text-gray-500">Order Date</p>
+            <p class="font-medium">${order.date}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Payment Method</p>
+            <p class="font-medium">${order.paymentMethod}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <h4 class="font-medium text-gray-700 mb-2">Shipping Address</h4>
+        <p class="text-sm">${order.shippingAddress}</p>
+      </div>
+      
+      <div>
+        <h4 class="font-medium text-gray-700 mb-2">Order Items</h4>
+        <div class="space-y-3">
+          ${order.items.map(item => `
+            <div class="flex gap-3">
+              <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
+              <div class="flex-1">
+                <h5 class="font-medium">${item.name}</h5>
+                <p class="text-sm text-gray-500">$${item.price.toFixed(2)} × ${item.quantity}</p>
+              </div>
+              <div class="text-right">
+                <p class="font-medium">$${(item.price * item.quantity).toFixed(2)}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <div class="border-t pt-4">
+        <div class="flex justify-between mb-2">
+          <span class="text-gray-600">Subtotal</span>
+          <span>$${order.total.toFixed(2)}</span>
+        </div>
+        <div class="flex justify-between mb-2">
+          <span class="text-gray-600">Tax</span>
+          <span>$${(order.total * 0.1).toFixed(2)}</span>
+        </div>
+        <div class="flex justify-between mb-2">
+          <span class="text-gray-600">Shipping</span>
+          <span>$5.00</span>
+        </div>
+        <div class="flex justify-between font-semibold text-lg">
+          <span>Total</span>
+          <span class="text-green-700">$${(order.total * 1.1 + 5).toFixed(2)}</span>
+        </div>
+      </div>
+      
+      <div class="flex gap-2 pt-4">
+        ${order.status === 'Delivered' ? `
+          <button onclick="reorderItems('${order.id}')" class="flex-1 bg-green-700 text-white py-2 rounded-lg hover:bg-green-800 transition">
+            Reorder Items
+          </button>
+        ` : ''}
+        <button onclick="downloadInvoice('${order.id}')" class="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300 transition">
+          Download Invoice
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('orderModal').classList.remove('hidden');
+  lucide.createIcons();
+}
+
+
+function closeOrderModal() {
+  document.getElementById('orderModal').classList.add('hidden');
+}
+
+
+function reorderItems(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+  
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  
+  order.items.forEach(item => {
+    const existing = cart.find(cartItem => cartItem.id === item.id);
+    if (existing) {
+      existing.quantity += item.quantity;
+    } else {
+      cart.push({...item});
+    }
+  });
+  
+  localStorage.setItem('cart', JSON.stringify(cart));
+  closeOrderModal();
+  window.location.href = 'cart.html';
+}
+
+
+function downloadInvoice(orderId) {
+  alert(`Invoice for order ${orderId} would be downloaded here.`);
+}
+
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('-translate-x-full');
+  overlay.classList.toggle('hidden');
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  initializeOrders();
+});
+</script>
+</body>
+</html>

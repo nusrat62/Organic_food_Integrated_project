@@ -25,11 +25,8 @@ body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
     </button>
     <div class="text-green-700 font-bold text-2xl flex items-center gap-2 italic">🌱 Pure Harvest</div>
   </div>
-  <div class="flex items-center gap-4">
-    <div class="hidden md:flex items-center gap-3 mr-4">
-      <a href="login.html" class="text-sm font-medium text-gray-600 hover:text-green-700">Login</a>
-      <a href="register.html" class="bg-green-700 text-white px-5 py-2 rounded-full text-sm font-bold shadow-md hover:bg-green-800 transition">Register</a>
-    </div>
+  <div id="navLinks" class="hidden md:flex items-center gap-3 mr-4">
+   
   </div>
 </nav>
 
@@ -69,14 +66,10 @@ body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
 <footer class="bg-green-700 text-white mt-12">
   <div class="max-w-7xl mx-auto py-12 px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
-    
-
     <div class="space-y-3">
       <h2 class="text-2xl font-bold flex items-center gap-2">🌱 Pure Harvest</h2>
       <p class="text-gray-200 text-sm">Connecting you directly with certified organic products for a healthier life. Fresh, healthy, and chemical-free, straight from farm to table.</p>
     </div>
-
-
     <div>
       <h3 class="font-semibold text-lg mb-3">Quick Links</h3>
       <ul class="space-y-2 text-gray-200 text-sm">
@@ -87,8 +80,6 @@ body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
         <li><a href="farmer-profile.html" class="hover:text-white transition">Farmer Profile</a></li>
       </ul>
     </div>
-
-
     <div>
       <h3 class="font-semibold text-lg mb-3">Account</h3>
       <ul class="space-y-2 text-gray-200 text-sm">
@@ -97,8 +88,6 @@ body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
         <li><a href="admin.html" class="hover:text-white transition">Admin Panel</a></li>
       </ul>
     </div>
-
-    <!-- Contact & Social -->
     <div>
       <h3 class="font-semibold text-lg mb-3">Contact & Follow</h3>
       <p class="text-gray-200 text-sm mb-3">Email: support@pureharvest.com</p>
@@ -110,22 +99,48 @@ body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
         <a href="#" class="p-2 rounded-full bg-green-600 hover:bg-green-500 transition"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
       </div>
     </div>
-
   </div>
-
   <div class="border-t border-green-600 mt-8 pt-4 text-center text-gray-200 text-sm">
     &copy; 2025 Pure Harvest. All rights reserved.
   </div>
 </footer>
 
+
 <script>
 lucide.createIcons();
+
+
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
     sidebar.classList.toggle('-translate-x-full');
     overlay.classList.toggle('hidden');
 }
+
+
+function updateNavbar() {
+    const nav = document.getElementById('navLinks');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (user) {
+        nav.innerHTML = `
+            <span class="text-sm font-medium text-gray-700">Hi, ${user.name}</span>
+            <button id="logoutBtn" class="bg-red-600 text-white px-4 py-1 rounded-full text-sm font-bold hover:bg-red-700 transition">Logout</button>
+        `;
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+    } else {
+        nav.innerHTML = `
+            <a href="login.html" class="text-sm font-medium text-gray-600 hover:text-green-700">Login</a>
+            <a href="register.html" class="bg-green-700 text-white px-5 py-2 rounded-full text-sm font-bold shadow-md hover:bg-green-800 transition">Register</a>
+        `;
+    }
+}
+
+
+updateNavbar();
 </script>
 
 </body>

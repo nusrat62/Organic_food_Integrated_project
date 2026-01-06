@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - Pure Harvest</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+.sidebar-transition { transition: transform 0.3s ease-in-out; }
+.fade-in { animation: fadeIn 0.5s ease-in; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.notification { position: fixed; top: 80px; right: 20px; z-index: 100; animation: slideIn 0.3s ease-out; }
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+</style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+
+<nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-[60] shadow-sm">
+  <div class="flex items-center gap-4">
+    <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-lg transition text-gray-700">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+    </button>
+    <div class="text-green-700 font-bold text-2xl flex items-center gap-2 italic">🌱 Pure Harvest</div>
+  </div>
+  <div class="hidden md:flex items-center gap-3 mr-4">
+    <div class="relative">
+      <button onclick="toggleUserMenu()" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition">
+        <i data-lucide="user" class="w-5 h-5"></i>
+        <span class="text-sm font-medium">Admin</span>
+        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+      </button>
+      <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg hidden z-10">
+        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+        <hr class="my-1">
+        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-[70] hidden backdrop-blur-sm"></div>
+<aside id="sidebar" class="fixed left-0 top-0 h-full w-72 bg-white z-[80] shadow-2xl sidebar-transition -translate-x-full flex flex-col p-6">
+  <div class="flex items-center justify-between mb-8">
+      <span class="text-green-700 font-bold text-xl">Navigation</span>
+      <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+  </div>
+  <nav class="flex flex-col gap-2">
+    <a href="index.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-green-50 transition"><i data-lucide="home" class="w-5 h-5"></i> Home</a>
+    <a href="product-crud.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-green-50 transition"><i data-lucide="box" class="w-5 h-5"></i> Products</a>
+    <a href="cart.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-green-50 transition"><i data-lucide="shopping-cart" class="w-5 h-5"></i> Shopping Cart</a>
+    <a href="checkout.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-green-50 transition"><i data-lucide="credit-card" class="w-5 h-5"></i> Checkout</a>
+    <a href="orders.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-green-50 transition"><i data-lucide="history" class="w-5 h-5"></i> Order History</a>
+    <a href="farmer-profile.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-green-50 transition"><i data-lucide="tractor" class="w-5 h-5"></i> Farmer Profile</a>
+    <a href="admin.html" class="flex items-center gap-4 p-3 rounded-xl bg-red-700 text-white shadow-lg"><i data-lucide="shield-check" class="w-5 h-5"></i> Admin Panel</a>
+  </nav>
+</aside>
+
+
+<div id="notificationContainer"></div>
+
+<main class="flex-1 p-6 md:p-12">
+  <div class="max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8 text-gray-800">Admin Dashboard</h1>
+    
+  
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white p-6 rounded-xl shadow">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-500">Total Products</h3>
+          <i data-lucide="box" class="w-5 h-5 text-green-700"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-800">600</p>
+        <p class="text-xs text-green-600 mt-1">+12% from last month</p>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-500">Total Orders</h3>
+          <i data-lucide="shopping-bag" class="w-5 h-5 text-blue-700"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-800">245</p>
+        <p class="text-xs text-blue-600 mt-1">+8% from last month</p>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-500">Revenue</h3>
+          <i data-lucide="dollar-sign" class="w-5 h-5 text-purple-700"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-800">$12,450</p>
+        <p class="text-xs text-purple-600 mt-1">+23% from last month</p>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-500">Customers</h3>
+          <i data-lucide="users" class="w-5 h-5 text-orange-700"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-800">1,842</p>
+        <p class="text-xs text-orange-600 mt-1">+5% from last month</p>
+      </div>
+    </div>
+    
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+
+      <div class="bg-white p-6 rounded-xl shadow">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">Sales Overview</h3>
+        <div class="h-64 flex items-end justify-between gap-2">
+          <div class="flex-1 bg-green-700 rounded-t" style="height: 60%"></div>
+          <div class="flex-1 bg-green-700 rounded-t" style="height: 75%"></div>
+          <div class="flex-1 bg-green-700 rounded-t" style="height: 50%"></div>
+          <div class="flex-1 bg-green-700 rounded-t" style="height: 85%"></div>
+          <div class="flex-1 bg-green-700 rounded-t" style="height: 70%"></div>
+          <div class="flex-1 bg-green-700 rounded-t" style="height: 90%"></div>
+          <div class="flex-1 bg-green-700 rounded-t" style="height: 65%"></div>
+        </div>
+        <div class="flex justify-between mt-2 text-xs text-gray-500">
+          <span>Mon</span>
+          <span>Tue</span>
+          <span>Wed</span>
+          <span>Thu</span>
+          <span>Fri</span>
+          <span>Sat</span>
+          <span>Sun</span>
+        </div>
+      </div>
+      
+     
+      <div class="bg-white p-6 rounded-xl shadow">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-800">Recent Orders</h3>
+          <a href="orders.html" class="text-green-700 hover:text-green-800 text-sm font-medium">View All</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b">
+                <th class="pb-2 text-sm font-medium text-gray-500">Order ID</th>
+                <th class="pb-2 text-sm font-medium text-gray-500">Customer</th>
+                <th class="pb-2 text-sm font-medium text-gray-500">Total</th>
+                <th class="pb-2 text-sm font-medium text-gray-500">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b">
+                <td class="py-2 text-sm">#1001</td>
+                <td class="py-2 text-sm">John Doe</td>
+                <td class="py-2 text-sm">$45.99</td>
+                <td class="py-2 text-sm"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-600">Delivered</span></td>
+              </tr>
+              <tr class="border-b">
+                <td class="py-2 text-sm">#1002</td>
+                <td class="py-2 text-sm">Jane Smith</td>
+                <td class="py-2 text-sm">$23.50</td>
+                <td class="py-2 text-sm"><span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600">Processing</span></td>
+              </tr>
+              <tr class="border-b">
+                <td class="py-2 text-sm">#1003</td>
+                <td class="py-2 text-sm">Bob Johnson</td>
+                <td class="py-2 text-sm">$67.25</td>
+                <td class="py-2 text-sm"><span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-600">Shipped</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+   
+    <div class="bg-white p-6 rounded-xl shadow">
+      <h3 class="text-lg font-semibold mb-4 text-gray-800">Quick Actions</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="product-crud.html" class="flex flex-col items-center p-4 border rounded-lg hover:bg-gray-50 transition">
+          <i data-lucide="plus-circle" class="w-8 h-8 text-green-700 mb-2"></i>
+          <span class="text-sm font-medium">Add Product</span>
+        </a>
+        <a href="#" class="flex flex-col items-center p-4 border rounded-lg hover:bg-gray-50 transition">
+          <i data-lucide="users" class="w-8 h-8 text-blue-700 mb-2"></i>
+          <span class="text-sm font-medium">Manage Users</span>
+        </a>
+        <a href="#" class="flex flex-col items-center p-4 border rounded-lg hover:bg-gray-50 transition">
+          <i data-lucide="tag" class="w-8 h-8 text-purple-700 mb-2"></i>
+          <span class="text-sm font-medium">Categories</span>
+        </a>
+        <a href="#" class="flex flex-col items-center p-4 border rounded-lg hover:bg-gray-50 transition">
+          <i data-lucide="bar-chart-2" class="w-8 h-8 text-orange-700 mb-2"></i>
+          <span class="text-sm font-medium">Analytics</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+
+function showNotification(message, type = 'success') {
+  const container = document.getElementById('notificationContainer');
+  const notification = document.createElement('div');
+  notification.className = `notification p-4 rounded-lg shadow-lg ${
+    type === 'success' ? 'bg-green-500' : 'bg-red-500'
+  } text-white`;
+  notification.innerHTML = `
+    <div class="flex items-center gap-2">
+      <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-5 h-5"></i>
+      <span>${message}</span>
+    </div>
+  `;
+  container.appendChild(notification);
+  lucide.createIcons();
+  
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+
+function toggleUserMenu() {
+  const userMenu = document.getElementById('userMenu');
+  userMenu.classList.toggle('hidden');
+}
+
+
+document.addEventListener('click', function(event) {
+  const userMenu = document.getElementById('userMenu');
+  const userMenuButton = event.target.closest('button');
+  
+  if (!userMenu.contains(event.target) && (!userMenuButton || !userMenuButton.onclick || !userMenuButton.onclick.toString().includes('toggleUserMenu'))) {
+    userMenu.classList.add('hidden');
+  }
+});
+
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('-translate-x-full');
+  overlay.classList.toggle('hidden');
+}
+
+
+document.getElementById('sidebar-overlay').addEventListener('click', toggleSidebar);
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>

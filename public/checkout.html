@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout - Pure Harvest</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+.sidebar-transition { transition: transform 0.3s ease-in-out; }
+.fade-in { animation: fadeIn 0.5s ease-in; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.notification { position: fixed; top: 80px; right: 20px; z-index: 100; animation: slideIn 0.3s ease-out; }
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.hero-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+</style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 via-white to-blue-50 min-h-screen">
+
+<nav class="glass-effect border-b border-white/20 px-6 py-4 flex items-center justify-between sticky top-0 z-[60] shadow-lg">
+  <div class="flex items-center gap-4">
+    <button onclick="toggleSidebar()" class="p-2 hover:bg-white/50 rounded-xl transition text-gray-700">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+    </button>
+    <div class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 font-bold text-2xl flex items-center gap-2 italic">🌱 Pure Harvest</div>
+  </div>
+  <div class="hidden md:flex items-center gap-3 mr-4">
+    <a href="cart.html" class="text-gray-700 hover:text-purple-600 transition flex items-center gap-2 font-medium px-4 py-2 rounded-lg hover:bg-white/50">
+      <i data-lucide="arrow-left" class="w-5 h-5"></i> Back to Cart
+    </a>
+  </div>
+</nav>
+
+
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/30 z-[70] hidden backdrop-blur-sm"></div>
+<aside id="sidebar" class="fixed left-0 top-0 h-full w-72 bg-white z-[80] shadow-2xl sidebar-transition -translate-x-full flex flex-col p-6">
+  <div class="flex items-center justify-between mb-8">
+      <span class="text-purple-600 font-bold text-xl">Navigation</span>
+      <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+  </div>
+  <nav class="flex flex-col gap-2">
+    <a href="index.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-purple-50 transition"><i data-lucide="home" class="w-5 h-5"></i> Home</a>
+    <a href="product-crud.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-purple-50 transition"><i data-lucide="box" class="w-5 h-5"></i> Products</a>
+    <a href="cart.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-purple-50 transition"><i data-lucide="shopping-cart" class="w-5 h-5"></i> Shopping Cart</a>
+    <a href="checkout.html" class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg"><i data-lucide="credit-card" class="w-5 h-5"></i> Checkout</a>
+    <a href="orders.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-purple-50 transition"><i data-lucide="history" class="w-5 h-5"></i> Order History</a>
+    <a href="farmer-profile.html" class="flex items-center gap-4 p-3 rounded-xl text-gray-600 hover:bg-purple-50 transition"><i data-lucide="tractor" class="w-5 h-5"></i> Farmer Profile</a>
+    <a href="admin.html" class="flex items-center gap-4 p-3 rounded-xl text-red-600 font-bold hover:bg-red-50 transition"><i data-lucide="shield-check" class="w-5 h-5"></i> Admin Panel</a>
+  </nav>
+</aside>
+
+
+<div id="notificationContainer"></div>
+
+
+<div id="orderConfirmationModal" class="fixed inset-0 bg-black/50 z-[90] hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 text-center">
+    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+      <i data-lucide="check-circle" class="w-10 h-10 text-green-600"></i>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Order Placed Successfully!</h2>
+    <p class="text-gray-600 mb-6">Your order has been confirmed and a confirmation email has been sent to your registered email address.</p>
+    <div class="flex gap-4">
+      <button onclick="closeOrderConfirmation()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl hover:bg-gray-300 transition font-semibold">
+        Continue Shopping
+      </button>
+      <button onclick="viewOrder()" class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl hover:shadow-lg transition font-semibold">
+        View Order
+      </button>
+    </div>
+  </div>
+</div>
+
+<main class="flex-1 p-6 md:p-12">
+  <div class="max-w-6xl mx-auto">
+   
+    <div class="hero-gradient rounded-3xl p-8 mb-8 text-white relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
+      <div class="relative z-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="bg-white/20 p-3 rounded-2xl backdrop-blur-sm">
+            <i data-lucide="credit-card" class="w-8 h-8"></i>
+          </div>
+          <h1 class="text-3xl md:text-4xl font-bold">Checkout</h1>
+        </div>
+        <p class="text-white/90 text-lg">Complete your order details</p>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+      <div class="lg:col-span-2">
+        <div class="bg-white/90 backdrop-blur-sm p-6 rounded-3xl shadow-xl border border-white/20 mb-6">
+          <h2 class="text-xl font-bold text-gray-800 mb-6">Shipping Information</h2>
+          <form id="checkoutForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <input type="text" id="firstName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                <input type="text" id="lastName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+              <input type="email" id="email" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+              <input type="tel" id="phone" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Shipping Address</label>
+              <input type="text" id="address" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                <input type="text" id="city" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                <input type="text" id="state" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                <input type="text" id="zipCode" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+              </div>
+            </div>
+          </form>
+        </div>
+        
+        <div class="bg-white/90 backdrop-blur-sm p-6 rounded-3xl shadow-xl border border-white/20">
+          <h2 class="text-xl font-bold text-gray-800 mb-6">Payment Information</h2>
+          <form id="paymentForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+              <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                <input type="text" id="expiryDate" placeholder="MM/YY" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                <input type="text" id="cvv" placeholder="123" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Name on Card</label>
+              <input type="text" id="cardName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      
+      <div class="lg:col-span-1">
+        <div class="bg-white/90 backdrop-blur-sm p-6 rounded-3xl shadow-xl sticky top-24 border border-white/20">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="bg-gradient-to-br from-purple-100 to-blue-100 p-3 rounded-xl">
+              <i data-lucide="file-text" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800">Order Summary</h2>
+          </div>
+          
+          <div id="orderItems" class="space-y-4 mb-6 max-h-60 overflow-y-auto">
+           
+          </div>
+          
+          <div class="space-y-4 mb-6">
+            <div class="flex justify-between pb-4 border-b border-gray-200">
+              <span class="text-gray-600 font-medium">Subtotal</span>
+              <span id="subtotal" class="font-bold text-lg">$0.00</span>
+            </div>
+            <div class="flex justify-between pb-4 border-b border-gray-200">
+              <span class="text-gray-600 font-medium">Tax (10%)</span>
+              <span id="tax" class="font-bold text-lg">$0.00</span>
+            </div>
+            <div class="flex justify-between pb-4 border-b border-gray-200">
+              <span class="text-gray-600 font-medium">Shipping</span>
+              <span id="shipping" class="font-bold text-lg">$5.00</span>
+            </div>
+            <div class="flex justify-between pt-4">
+              <span class="text-xl font-bold text-gray-800">Total</span>
+              <span id="total" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">$0.00</span>
+            </div>
+          </div>
+          
+          <button id="placeOrderBtn" onclick="placeOrder()" class="block w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-2xl hover:shadow-xl transition text-center font-bold text-lg relative">
+            <span class="relative z-10 flex items-center justify-center gap-2">
+              <i data-lucide="lock" class="w-5 h-5"></i> Place Order
+            </span>
+          </button>
+          
+          <div class="mt-6 p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-200">
+            <div class="flex items-start gap-3">
+              <div class="bg-green-100 p-2 rounded-lg">
+                <i data-lucide="shield-check" class="w-5 h-5 text-green-600"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-green-900">Secure Checkout</h3>
+                <p class="text-sm text-green-700 mt-1">Your payment information is encrypted and secure</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+
+let cart = [];
+let currentUser = null;
+
+
+function fetchCurrentUser() {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (user) {
+    currentUser = user;
+    
+    if (user.email) document.getElementById('email').value = user.email;
+    if (user.name) {
+      const nameParts = user.name.split(' ');
+      if (nameParts.length > 0) document.getElementById('firstName').value = nameParts[0];
+      if (nameParts.length > 1) document.getElementById('lastName').value = nameParts.slice(1).join(' ');
+    }
+  }
+}
+
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('-translate-x-full');
+  overlay.classList.toggle('hidden');
+}
+document.getElementById('sidebar-overlay').addEventListener('click', toggleSidebar);
+
+
+function showNotification(message, type = 'success') {
+  const container = document.getElementById('notificationContainer');
+  const notification = document.createElement('div');
+  notification.className = `notification p-4 rounded-2xl shadow-2xl ${
+    type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-pink-500'
+  } text-white`;
+  notification.innerHTML = `
+    <div class="flex items-center gap-3">
+      <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-6 h-6"></i>
+      <span class="font-medium">${message}</span>
+    </div>
+  `;
+  container.appendChild(notification);
+  lucide.createIcons();
+  
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+
+function loadCart() {
+  cart = JSON.parse(localStorage.getItem('checkoutCart')) || [];
+  const orderItems = document.getElementById('orderItems');
+  
+  if (cart.length === 0) {
+    orderItems.innerHTML = '<p class="text-gray-500 text-center py-4">Your cart is empty</p>';
+    calculateTotal();
+    return;
+  }
+  
+  orderItems.innerHTML = '';
+  
+  cart.forEach(item => {
+    const div = document.createElement('div');
+    div.className = "flex items-center gap-4";
+    
+    div.innerHTML = `
+      <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-xl">
+      <div class="flex-1">
+        <h3 class="font-semibold text-gray-800">${item.name}</h3>
+        <p class="text-sm text-gray-500">Qty: ${item.quantity} × $${item.price.toFixed(2)}</p>
+      </div>
+      <div class="font-bold text-gray-800">$${(item.price * item.quantity).toFixed(2)}</div>
+    `;
+    
+    orderItems.appendChild(div);
+  });
+  
+  calculateTotal();
+  lucide.createIcons();
+}
+
+
+function calculateTotal() {
+  const subtotalElement = document.getElementById('subtotal');
+  const taxElement = document.getElementById('tax');
+  const totalElement = document.getElementById('total');
+  
+  let subtotal = 0;
+  cart.forEach(item => {
+    subtotal += item.price * item.quantity;
+  });
+  
+  const tax = subtotal * 0.1;
+  const shipping = cart.length > 0 ? 5 : 0;
+  const total = subtotal + tax + shipping;
+  
+  subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+  taxElement.textContent = `$${tax.toFixed(2)}`;
+  totalElement.textContent = `$${total.toFixed(2)}`;
+}
+
+
+function placeOrder() {
+
+  const checkoutForm = document.getElementById('checkoutForm');
+  const paymentForm = document.getElementById('paymentForm');
+  
+  if (!checkoutForm.checkValidity()) {
+    checkoutForm.reportValidity();
+    return;
+  }
+  
+  if (!paymentForm.checkValidity()) {
+    paymentForm.reportValidity();
+    return;
+  }
+  
+
+  const orderDetails = {
+    id: Date.now(),
+    date: new Date().toISOString(),
+    items: cart,
+    shipping: {
+      firstName: document.getElementById('firstName').value,
+      lastName: document.getElementById('lastName').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
+      address: document.getElementById('address').value,
+      city: document.getElementById('city').value,
+      state: document.getElementById('state').value,
+      zipCode: document.getElementById('zipCode').value
+    },
+    payment: {
+      cardNumber: document.getElementById('cardNumber').value,
+      expiryDate: document.getElementById('expiryDate').value,
+      cvv: document.getElementById('cvv').value,
+      cardName: document.getElementById('cardName').value
+    },
+    subtotal: document.getElementById('subtotal').textContent,
+    tax: document.getElementById('tax').textContent,
+    shipping: document.getElementById('shipping').textContent,
+    total: document.getElementById('total').textContent
+  };
+  
+  
+  let orders = JSON.parse(localStorage.getItem('orders')) || [];
+  orders.push(orderDetails);
+  localStorage.setItem('orders', JSON.stringify(orders));
+  
+
+  localStorage.setItem('lastOrderDetails', JSON.stringify(orderDetails));
+  
+
+  localStorage.setItem('orderConfirmed', 'true');
+  
+
+  localStorage.setItem('cart', JSON.stringify([]));
+  localStorage.setItem('checkoutCart', JSON.stringify([]));
+  
+
+  showNotification("Order placed successfully!");
+  
+
+  setTimeout(() => {
+    window.location.href = 'cart.html';
+  }, 1000);
+}
+
+
+function closeOrderConfirmation() {
+  document.getElementById('orderConfirmationModal').classList.add('hidden');
+
+  window.location.href = 'index.html';
+}
+
+
+function viewOrder() {
+  document.getElementById('orderConfirmationModal').classList.add('hidden');
+
+  window.location.href = 'orders.html';
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  fetchCurrentUser();
+  loadCart();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>
